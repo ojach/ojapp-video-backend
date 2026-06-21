@@ -32,11 +32,10 @@ app.post('/process', upload.single('video'), (req, res) => {
     // 音声があってもなくても、エラーで強制終了させずに「あれば圧縮、なければ無視」にする最強のオプション
     let ffmpegCommand = '';
     if (mode === 'vhs') {
-      ffmpegCommand = `ffmpeg -y -i "${inputPath}" -vf "scale=iw/2:ih/2" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -an "${outputPath}"`;
-      // ⚠️ 一旦一番安全な「音声を入れない（-an）」または「音声コピー」でテスト。
-      // 今回はまず確実に動かすために、音声を一旦カットして映像圧縮に集中させます（-an）
+      // ⚠️ 頭を ${ffmpegPath} に変えて、内蔵重機の場所を直接指定する！
+      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -vf "scale=iw/2:ih/2" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -an "${outputPath}"`;
     } else {
-      ffmpegCommand = `ffmpeg -y -i "${inputPath}" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -an "${outputPath}"`;
+      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -an "${outputPath}"`;
     }
 
     exec(ffmpegCommand, (error, stdout, stderr) => {
