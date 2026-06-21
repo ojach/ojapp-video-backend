@@ -27,16 +27,25 @@ app.post('/process', upload.single('video'), (req, res) => {
     const inputPath = videoFile.path;
     const outputPath = path.join('/tmp', `processed_${Date.now()}.mp4`);
 
-    console.log(`動画処理開始: ${videoFile.originalname} (${videoFile.size} bytes) - モード: ${mode}`);
+    console.log(`動画処理開始: ${videoFile.originalname} - モード: ${mode}`);
 
     // 音声があってもなくても、エラーで強制終了させずに「あれば圧縮、なければ無視」にする最強のオプション
     let ffmpegCommand = '';
     if (mode === 'vhs') {
-      // ⚠️ -an を撤去！音声があればAAC（64k）で圧縮、スマホ互換性も最強（yuv420p）に
-      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -vf "scale=iw/2:ih/2" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k -strict -2 "${outputPath}"`;
+      // ① ガチVHS（解像度半分 ＋ ノイズ ＋ 色ズレ）
+      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -vf "scale=iw/2:ih/2,noise=alls=15:allf=t,chromashift=cbx=2:cby=0:crx=-2:cry=0" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
+    } else if (mode === 'pixel') {
+      // ② ドット絵（超低解像度モザイク ＋ 16色制限風）
+      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -vf "scale=160:-1:flags=neighbor,scale=iw*2:ih*2:flags=neighbor,format=pal8" -b:v 200k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
+    } else if (mode === 'matrix') {
+      // ③ 残像モーション（コマを平均化してブレを発生）
+      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -vf "scale=iw/2:ih/2,tblend=all_mode=average" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
+    } else if (mode === 'monochrome') {
+      // ④ ローファイ白黒（彩度ゼロ ＋ 強コントラスト ＋ フィルムノイズ）
+      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -vf "scale=iw/2:ih/2,hue=s=0,eq=contrast=1.3:brightness=0.05,noise=alls=25:allf=t" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
     } else {
-      // Minimalモードも音声をしっかり残す！
-      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k -strict -2 "${outputPath}"`;
+      // ⑤ minimal（ただの超軽量化）
+      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
     }
 
     exec(ffmpegCommand, (error, stdout, stderr) => {
