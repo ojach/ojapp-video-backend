@@ -1,17 +1,9 @@
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 process.env.FFMPEG_PATH = ffmpegPath;
 
-const { execSync } = require("child_process");
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 
 console.log("FFMPEG PATH =", ffmpegPath);
-
-try {
-  console.log(
-    execSync(`"${ffmpegPath}" -version`).toString()
-  );
-} catch (e) {
-  console.error(e);
-}
 
 const express = require('express');
 const multer = require('multer');
