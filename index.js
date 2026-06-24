@@ -48,15 +48,15 @@ app.post('/process', upload.single('video'), (req, res) => {
     let ffmpegCommand = '';
     // 🟩 安定版コマンド（元通りの構成）
     if (mode === 'vhs') {
-      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -map 0:v:0 -map 0:a:0 -vf "scale=iw/2:ih/2,noise=alls=5:allf=t,chromashift=cbx=2:cby=0:crx=-2:cry=0,drawbox=x=w-140:y=25:w=12:h=12:color=red:t=fill,drawtext=text='REC':x=w-120:y=20:fontcolor=red:fontsize=28" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
+      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -i "./overlay/rec.png" -filter_complex "[0:v]scale=iw/2:ih/2,noise=alls=5:allf=t,chromashift=cbx=2:cby=0:crx=-2:cry=0[v];[v][1:v]overlay=20:20" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
     } else if (mode === 'pixel') {
-      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -map 0:v:0 -map 0:a:0 -vf "scale=160:-1:flags=neighbor,scale=iw*2:ih*2:flags=neighbor,format=pal8" -b:v 200k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
+      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -vf "scale=160:-1:flags=neighbor,scale=iw*2:ih*2:flags=neighbor,format=pal8" -b:v 200k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
     } else if (mode === 'matrix') {
       ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -map 0:v:0 -map 0:a:0 -vf "scale=iw/2:ih/2,tblend=all_mode=average" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
     } else if (mode === 'monochrome') {
-      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -map 0:v:0 -map 0:a:0 -vf "scale=iw/2:ih/2,hue=s=0,eq=contrast=1.3:brightness=0.05,noise=alls=25:allf=t" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
+      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -vf "scale=iw/2:ih/2,hue=s=0,eq=contrast=1.3:brightness=0.05,noise=alls=25:allf=t" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
     } else {
-      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -map 0:v:0 -map 0:a:0 -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
+      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
     }
 
     exec(ffmpegCommand, (error, stdout, stderr) => {
