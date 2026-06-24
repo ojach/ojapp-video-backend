@@ -1,10 +1,6 @@
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 process.env.FFMPEG_PATH = ffmpegPath;
 
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-
-console.log("FFMPEG PATH =", ffmpegPath);
-
 const express = require('express');
 const multer = require('multer');
 const { exec } = require('child_process');
@@ -14,6 +10,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const upload = multer({ dest: '/tmp/' });
+
+app.get('/ffmpeg', (req, res) => {
+  res.send(ffmpegPath);
+});
 
 app.get('/', (req, res) => {
   res.send('OJapp Video Backend (FFmpeg Fixed) is running! 🎬');
