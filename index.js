@@ -12,7 +12,19 @@ const port = process.env.PORT || 3000;
 const upload = multer({ dest: '/tmp/' });
 
 app.get('/ffmpeg', (req, res) => {
-  res.send(ffmpegPath);
+
+  exec(`"${ffmpegPath}" -version`, (err, stdout, stderr) => {
+
+    if (err) {
+      return res.send(err.toString());
+    }
+
+    res.send(
+      `<pre>${stdout}</pre>`
+    );
+
+  });
+
 });
 
 app.get('/', (req, res) => {
