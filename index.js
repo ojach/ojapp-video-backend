@@ -54,7 +54,7 @@ app.post('/process', upload.single('video'), (req, res) => {
     } else if (mode === 'matrix') {
       ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -vf "scale='if(lt(iw,ih),480,-2)':'if(lt(iw,ih),-2,480)',tblend=all_mode=average" -r 30 -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
     } else if (mode === 'monochrome') {
-      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -vf "scale='if(lt(iw,ih),480,-2)':'if(lt(iw,ih),-2,480)',hue=s=0,eq=contrast=1.3:brightness=0.05,noise=alls=25:allf=t" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
+      ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -vf "scale='if(lt(iw,ih),480,-2)':'if(lt(iw,ih),-2,480)',hue=s=0,eq=contrast=1.3:brightness=0.05,noise=alls=25:allf=t" -r 30 -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
     } else {
       ffmpegCommand = `"${ffmpegPath}" -y -i "${inputPath}" -r 25 -vf "scale='if(lt(iw,ih),480,-2)':'if(lt(iw,ih),-2,480)'" -b:v 400k -c:v libx264 -pix_fmt yuv420p -preset fast -c:a aac -b:a 64k "${outputPath}"`;
     }
